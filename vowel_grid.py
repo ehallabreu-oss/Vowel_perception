@@ -12,7 +12,7 @@ centers = np.array([
     [669.84, 995.82],
     [342.67, 1239.11]
 ]) # shape (7, 2)
-labels = ["/ɑ/", "/ɛ/", "/i/", "/ɪ/", "/ɒ/", "/u/"]
+labels = ["/æ/", "/ɛ/", "/i/", "/ɪ/", "/ɒ/", "/u/"]
 
 # making the expanded convex hull
 hull = ConvexHull(centers)
@@ -27,8 +27,8 @@ F1_min, F1_max = expanded_vertices[:,0].min(), expanded_vertices[:,0].max()
 F2_min, F2_max = expanded_vertices[:,1].min(), expanded_vertices[:,1].max()
 
 # Make grid
-F1_vals = np.linspace(F1_min, F1_max, 12)
-F2_vals = np.linspace(F2_min, F2_max, 12)
+F1_vals = np.linspace(F1_min, F1_max, 5)
+F2_vals = np.linspace(F2_min, F2_max, 5)
 F1_grid, F2_grid = np.meshgrid(F1_vals, F2_vals)
 
 # Flatten both grids for convex hull operations later
