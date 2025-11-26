@@ -27,8 +27,8 @@ F1_min, F1_max = expanded_vertices[:,0].min(), expanded_vertices[:,0].max()
 F2_min, F2_max = expanded_vertices[:,1].min(), expanded_vertices[:,1].max()
 
 # Make grid
-F1_vals = np.linspace(F1_min, F1_max, 5)
-F2_vals = np.linspace(F2_min, F2_max, 5)
+F1_vals = np.linspace(F1_min, F1_max, 11)
+F2_vals = np.linspace(F2_min, F2_max, 11)
 F1_grid, F2_grid = np.meshgrid(F1_vals, F2_vals)
 
 # Flatten both grids for convex hull operations later
@@ -45,6 +45,8 @@ inside_points = grid_points[mask]
 outside_points = grid_points[~mask]
 
 print(inside_points.shape)
+print(inside_points)
+
 df = pd.DataFrame(inside_points, columns=["F1", "F2"])
 df.to_csv("inside_points.csv", index=False)
 
