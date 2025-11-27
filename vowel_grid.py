@@ -3,7 +3,6 @@ from scipy.spatial import ConvexHull
 import matplotlib.pyplot as plt
 import pandas as pd
 
-
 centers = np.array([ 
     [769.73, 1528.8],  
     [631.82, 1734.60],
