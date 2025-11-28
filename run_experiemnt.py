@@ -25,17 +25,43 @@ choices = ["bat", "bet", "beet", "bit", "bought", "boot"]
 results = []
 
 # ----------------------
-# Main experiment class
+# Experiment class
 # ----------------------
 
 class Experiment:
     def __init__(self, root):
         self.root = root       
+        
+        # --- Start window ---
+        self.start_label = tk.Label(root, text="Welcome to this experiment!", font=("Arial", 36))
+        self.start_label.pack(pady=30)  
+        self.instructions = tk.Label(root, text="You will hear a word.\n" \
+        "Choose the word you think it is from the 6 options bellow.\n\n"
+        "Bat\n" "Bet\n" "Beet\n" "Bit\n" "Bought\n" "Boot\n\n"
+        "Press SPACE to begin", font=("Arial", 34))
+        self.instructions.pack(pady=20)
+
+        self.root.bind("<space>", self.start_experiment) # bind space key
+  
+        self.current_trial = -1 #so first increment lands at 0
+        self.started = False  
+
+    def start_experiment(self, event=None):
+        if self.started: # if it started, space bar does nothing
+            return None
+        self.started = True
+
+        # clears initial instructrions
+        self.start_label.destroy()
+        self.instructions.destroy()
+        self.root.unbind("<space>")
+
+        # between trial labels
         self.label = tk.Label(root, text="Which word did you hear?", font=("Arial", 28))
         self.label.pack(pady=20) #add to the window with vertical padding
         self.message_label = tk.Label(root, text="", font=("Arial", 28))
         self.message_label.pack(pady=30)
-        
+
         self.buttons = []
         for word in choices:
             button = tk.Button(root, text=word, font=("Arial", 24), width=12, height=2,
@@ -43,8 +69,8 @@ class Experiment:
             button.pack(pady=10)
             self.buttons.append(button)
 
-        self.current_trial = -1 #so first increment lands at 0
         self.next_trial()
+
 
     def next_trial(self):
         self.message_label.config(text="") # clear message
@@ -62,14 +88,13 @@ class Experiment:
         # play sound
         idx = trial_indices[self.current_trial] # get index of current trial
         file_path = mapping[idx]    # get corresponding vowel wav file path
-        data, sampling_rate = sf.read(file_path) # read the wav file
-        sd.play(data, sampling_rate) # play the sound
-        sd.wait()  # Wait until file is done playing
+        data, sampling_rate = sf.read(file_path) 
+        sd.play(data, sampling_rate) 
 
         #remember which stim was played
         self.current_idx = idx
 
-    def record_answer(self, choice): # record answer per trial
+    def record_answer(self, choice): 
         F1, F2 = coords[self.current_idx]
         
         results.append({
@@ -93,7 +118,6 @@ class Experiment:
             button.config(state="disabled")
         self.root.after(1000, self.next_trial)
         
-
     def end_experiment(self):
         df = pd.DataFrame(results)
         df.to_csv("vowel_classification_results.csv", index=False)
@@ -105,6 +129,6 @@ class Experiment:
 # ---------------
 
 root = tk.Tk() # create main window
-root.geometry("400x800")
+root.geometry("900x800")
 Experiment(root) # create experiment object inside main window
 root.mainloop() # start the GUI event loop
