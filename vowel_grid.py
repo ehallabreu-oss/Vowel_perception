@@ -3,7 +3,7 @@ from scipy.spatial import ConvexHull
 import matplotlib.pyplot as plt
 import pandas as pd
 
-centers = np.array([ 
+centers = np.array([
     [769.73, 1528.8],  
     [631.82, 1734.60],
     [267.86, 2363.75],
@@ -42,6 +42,8 @@ def in_hull(points):
 mask = in_hull(grid_points)
 inside_points = grid_points[mask]
 outside_points = grid_points[~mask]
+
+print(inside_points[48])
 
 print(inside_points.shape)
 print(inside_points)
