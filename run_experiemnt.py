@@ -6,6 +6,7 @@ import random
 import soundfile as sf
 import sounddevice as sd
 import tkinter as tk
+from tkinter import simpledialog
 
 # Load files
 coords = pd.read_csv("inside_points.csv", skiprows=0).to_numpy()
@@ -31,7 +32,8 @@ results = []
 class Experiment:
     def __init__(self, root):
         self.root = root       
-        
+        self.participant_id = participant_id
+
         # --- Start window ---
         self.start_label = tk.Label(root, text="Welcome to this experiment!", font=("Arial", 36))
         self.start_label.pack(pady=30)  
@@ -120,7 +122,8 @@ class Experiment:
         
     def end_experiment(self):
         df = pd.DataFrame(results)
-        df.to_csv("vowel_classification_results.csv", index=False)
+        file_name = f"{self.participant_id}_vowel_classification_results.csv"
+        df.to_csv(file_name, index=False)
         print(df)
         self.root.quit() #close window
 
@@ -130,5 +133,8 @@ class Experiment:
 
 root = tk.Tk() # create main window
 root.geometry("900x800")
+root.withdraw()
+participant_id = simpledialog.askstring("Participant ID", "Enter your participant ID:")
+root.deiconify()
 Experiment(root) # create experiment object inside main window
 root.mainloop() # start the GUI event loop
