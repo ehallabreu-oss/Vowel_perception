@@ -10,7 +10,7 @@ centers = np.array([
     [461.38, 1906.73],
     [669.84, 995.82],
     [342.67, 1239.11]
-]) # shape (7, 2)
+]) 
 labels = ["/æ/", "/ɛ/", "/i/", "/ɪ/", "/ɒ/", "/u/"]
 
 # making the expanded convex hull
