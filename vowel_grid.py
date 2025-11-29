@@ -43,11 +43,6 @@ mask = in_hull(grid_points)
 inside_points = grid_points[mask]
 outside_points = grid_points[~mask]
 
-print(inside_points[48])
-
-print(inside_points.shape)
-print(inside_points)
-
 df = pd.DataFrame(inside_points, columns=["F1", "F2"])
 df.to_csv("inside_points.csv", index=False)
 

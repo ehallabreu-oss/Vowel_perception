@@ -19,7 +19,6 @@ mapping = {i: f"/Users/Eduardinho/Desktop/UCU/Sem5/Phonetics/vowel recordings/vo
 # Randomize order
 trial_indices = list(mapping.keys()) # create a list of all indices
 random.shuffle(trial_indices) # shuffle them randomly
-random.seed(0)  # for reproducibility
 
 # intialize variables
 choices = ["bat", "bet", "beet", "bit", "bought", "boot"]
@@ -118,7 +117,7 @@ class Experiment:
         self.root.update_idletasks()
         for button in self.buttons:
             button.config(state="disabled")
-        self.root.after(1000, self.next_trial)
+        self.root.after(700, self.next_trial)
         
     def end_experiment(self):
         df = pd.DataFrame(results)
