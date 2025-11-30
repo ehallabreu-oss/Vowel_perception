@@ -24,9 +24,9 @@ random.shuffle(trial_indices) # shuffle them randomly
 choices = ["bat", "bet", "beet", "bit", "bought", "boot"]
 results = []
 
-# ----------------------
+# ---------------------
 # Experiment class
-# ----------------------
+# ---------------------
 
 class Experiment:
     def __init__(self, root):

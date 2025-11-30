@@ -13,7 +13,7 @@ centers = np.array([
 labels = ["/æ/", "/ɛ/", "/i/", "/ɪ/", "/ɒ/", "/u/"]
 basic_colors = ['red', 'orange', 'brown', 'green', 'blue', 'pink']
 
-data = pd.read_csv("Rene_3_vowel_classification_results.csv")
+data = pd.read_csv("Avery_3_vowel_classification_results.csv")
 formants = data[["F1", "F2"]].to_numpy()
 response = data["response"].to_numpy()
 
@@ -38,5 +38,5 @@ for (F1, F2), label in zip(centers, labels):
 
 ax.set_xlabel("F2 Hz")
 ax.set_ylabel("F1 Hz")
-ax.set_title("Rene 3")
+ax.set_title("vowel grid")
 plt.show()
