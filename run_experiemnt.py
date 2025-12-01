@@ -99,7 +99,6 @@ class Experiment:
         F1, F2 = coords[self.current_idx]
         
         results.append({
-            "idx": self.current_idx,
             # "wav_file": mapping[self.current_idx],
             "index": self.current_idx,
             "F1": F1,

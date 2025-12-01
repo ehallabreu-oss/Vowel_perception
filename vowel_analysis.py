@@ -26,7 +26,7 @@ ax.xaxis.set_inverted(True)
 ax.yaxis.set_inverted(True)
 
 for idx in range(len(response_colors)):
-    ax.scatter(formants[idx,1], formants[idx,0], color=response_colors[idx], s=50)
+    ax.scatter(formants[idx,1], formants[idx,0], color=response_colors[idx], s=100)
 
 for i in range(centers.shape[0]):
     ax.scatter(centers[i,1], centers[i,0], color=basic_colors[i], label=labels[i], edgecolors='black', s=20)
