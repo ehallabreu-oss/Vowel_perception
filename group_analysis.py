@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import glob 
 import matplotlib.pyplot as plt
+from scipy.interpolate import griddata
 
 centers = np.array([
     [769.73, 1528.8],  
@@ -28,6 +29,7 @@ count_matrix = data.pivot_table(
     fill_value=0 # add zeros when no answer
 )
 
+print(count_matrix.head())
 prob_matrix = count_matrix.div(count_matrix.sum(axis=1), axis=0)
 
 
@@ -59,9 +61,8 @@ color_map = color_map_df.values
 # prob_matrix['color'] = prob_matrix['predicted_word'].map(word_to_color)
 # color_list = prob_matrix['color'] 
 
-F1 = prob_matrix.index.get_level_values('F1')
-F2 = prob_matrix.index.get_level_values('F2') 
-
+F1 = prob_matrix.index.get_level_values('F1').to_numpy()
+F2 = prob_matrix.index.get_level_values('F2').to_numpy()
 
 # Plotting
 plt.style.use('dark_background')
@@ -79,11 +80,63 @@ for i in range(centers.shape[0]):
 
 ax.legend(title="Vowel Categories")
 
-for (F1, F2), label in zip(centers, ipa_labels):
-    ax.text(F2, F1 - 10, label, fontsize=14, ha='center', va='bottom')  
+# for (F1, F2), label in zip(centers, ipa_labels):
+#     ax.text(F2, F1 - 10, label, fontsize=14, ha='center', va='bottom')  
 
 ax.set_xlabel("F2 Hz")
 ax.set_ylabel("F1 Hz")
 ax.set_title("vowel grid")
 plt.show()
 
+# ----------------------
+# Interpolated Heat map
+# ----------------------
+
+num = 150  # resolution
+
+F1_grid = np.linspace(F1.min(), F1.max(), num)
+F2_grid = np.linspace(F2.min(), F2.max(), num)
+
+F2_mesh, F1_mesh = np.meshgrid(F2_grid, F1_grid)
+grid_coords = np.column_stack([F2_mesh.ravel(), F1_mesh.ravel()])
+
+points = np.column_stack((F2, F1))
+
+R = color_map[:,0]
+G = color_map[:,1]
+B = color_map[:,2]
+
+R_grid = griddata(points, R, grid_coords, method='cubic') # (150*150,)
+G_grid = griddata(points, G, grid_coords, method='cubic')
+B_grid = griddata(points, B, grid_coords, method='cubic')
+
+# reshape into 2d vectors
+R_img = R_grid.reshape(F1_mesh.shape) # (150, 150)
+G_img = G_grid.reshape(F1_mesh.shape)
+B_img = B_grid.reshape(F1_mesh.shape)
+
+
+RGB_img = np.stack([R_img, G_img, B_img], axis=2) # (150, 150, 3)
+
+fig, ax = plt.subplots(figsize=(6, 5))
+
+ax.imshow(
+    RGB_img,
+    extent=(F2.min(), F2.max(), F1.max(), F1.min()), 
+    aspect='auto'
+)
+
+ax.set_xlabel("F2 (Hz)")
+ax.set_ylabel("F1 (Hz)")
+ax.set_title("Smooth Perceptual Vowel Map")
+
+# Optional: overlay original sample points
+#ax.scatter(F2, F1, color=color_map, edgecolors='k', s=40)
+
+for (F1, F2), label in zip(centers, ipa_labels):
+    ax.text(F2, F1 - 10, label, fontsize=14, ha='center', va='bottom')  
+
+ax.xaxis.set_inverted(True)
+ax.yaxis.set_inverted(True)
+
+plt.show()
