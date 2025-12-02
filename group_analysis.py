@@ -6,12 +6,12 @@ from mpl_toolkits.mplot3d import Axes3D
 from scipy.interpolate import griddata
 
 centers = np.array([
-    [769.73, 1528.8],  
-    [631.82, 1734.60],
-    [267.86, 2363.75],
-    [461.38, 1906.73],
-    [669.84, 995.82],
-    [342.67, 1239.11]
+    [267.86, 2363.75],  #beet
+    [342.67, 1239.11],  #boot
+    [669.84, 995.82],   #bought
+    [769.73, 1528.8],   #bat
+    [631.82, 1734.60],  #bet
+    [461.38, 1906.73]   #bit
 ]) 
 
 # load data from all participants
@@ -32,18 +32,19 @@ count_matrix = data.pivot_table(
 
 prob_matrix = count_matrix.div(count_matrix.sum(axis=1), axis=0)
 
-ipa_labels = ["/æ/", "/ɛ/", "/i/", "/ɪ/", "/ɒ/", "/u/"]
-word_labels = ["bat", "bet", "beet", "bit", "bought", "boot"]
-basic_colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple']
+
+ipa_labels = ["/i/", "/u/", "/ɒ/", "/æ/", "/ɛ/", "/ɪ/"]
+word_labels = ["beet", "boot", "bought", "bat", "bet", "bit"]
+basic_colors = ['yellow', 'orange', 'red', 'purple', 'blue', 'green']
 word_to_color = dict(zip(word_labels, basic_colors))
 
 label_colors = {
-    "bat": np.array([1, 0, 0]), 
-    "bet": np.array([1, 0.5, 0]),
-    "beet": np.array([1, 1, 0]),
-    "bit": np.array([0, 1, 0]),
-    "bought": np.array([0, 0, 1]),
-    "boot": np.array([0.5, 0, 0.5])
+    "beet": np.array([1, 1, 0]),    # yellow
+    "boot": np.array([1, 0.5, 0]),  # orange
+    "bought": np.array([1, 0, 0]),  # red
+    "bat": np.array([0.5, 0, 0.5]), # purple  
+    "bet": np.array([0, 0, 1]),     # blue
+    "bit": np.array([0, 1, 0])      # green
 }
 
 rgb_label_matrix = np.vstack(list(label_colors.values()))
@@ -168,9 +169,9 @@ ax.plot_surface(
     F1_mesh,
     Z_2d,
     facecolors=RGB_surf_clip,
-    rstride=3, cstride=3,
-    edgecolor='black',
-    linewidth=0.5,
+    #rstride=3, cstride=3,
+    #edgecolor='black',
+    linewidth=6,
     shade=False
 )
 
