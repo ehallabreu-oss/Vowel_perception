@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import glob 
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 from scipy.interpolate import griddata
 
 centers = np.array([
@@ -29,9 +30,7 @@ count_matrix = data.pivot_table(
     fill_value=0 # add zeros when no answer
 )
 
-print(count_matrix.head())
 prob_matrix = count_matrix.div(count_matrix.sum(axis=1), axis=0)
-
 
 ipa_labels = ["/æ/", "/ɛ/", "/i/", "/ɪ/", "/ɒ/", "/u/"]
 word_labels = ["bat", "bet", "beet", "bit", "bought", "boot"]
@@ -55,7 +54,6 @@ rgb_df = pd.DataFrame(rgb_label_matrix, index=word_labels, columns=["R","G","B"]
 # dot will align columns of prob_mat_ordered with index of rgb_df by label names
 color_map_df = prob_matrix.dot(rgb_df)   # DataFrame (N, 3)
 color_map = color_map_df.values
-
 
 # prob_matrix['predicted_word'] = prob_matrix.idxmax(axis=1)
 # prob_matrix['color'] = prob_matrix['predicted_word'].map(word_to_color)
@@ -86,7 +84,7 @@ ax.legend(title="Vowel Categories")
 ax.set_xlabel("F2 Hz")
 ax.set_ylabel("F1 Hz")
 ax.set_title("vowel grid")
-plt.show()
+#plt.show()
 
 # ----------------------
 # Interpolated Heat map
@@ -102,19 +100,21 @@ grid_coords = np.column_stack([F2_mesh.ravel(), F1_mesh.ravel()])
 
 points = np.column_stack((F2, F1))
 
+
 R = color_map[:,0]
 G = color_map[:,1]
 B = color_map[:,2]
+print('R', R.shape)
 
 R_grid = griddata(points, R, grid_coords, method='cubic') # (150*150,)
 G_grid = griddata(points, G, grid_coords, method='cubic')
 B_grid = griddata(points, B, grid_coords, method='cubic')
+print('R_grid', R_grid.shape)
 
 # reshape into 2d vectors
 R_img = R_grid.reshape(F1_mesh.shape) # (150, 150)
 G_img = G_grid.reshape(F1_mesh.shape)
 B_img = B_grid.reshape(F1_mesh.shape)
-
 
 RGB_img = np.stack([R_img, G_img, B_img], axis=2) # (150, 150, 3)
 
@@ -126,17 +126,66 @@ ax.imshow(
     aspect='auto'
 )
 
-ax.set_xlabel("F2 (Hz)")
-ax.set_ylabel("F1 (Hz)")
-ax.set_title("Smooth Perceptual Vowel Map")
+ax.scatter(F2, F1, c=color_map, s=50, edgecolors='black')
 
-# Optional: overlay original sample points
-#ax.scatter(F2, F1, color=color_map, edgecolors='k', s=40)
+# natural vowels
+for i in range(centers.shape[0]):
+    ax.scatter(centers[i,1], centers[i,0], color=basic_colors[i], label=ipa_labels[i], edgecolors='black', s=60)
 
-for (F1, F2), label in zip(centers, ipa_labels):
-    ax.text(F2, F1 - 10, label, fontsize=14, ha='center', va='bottom')  
+ax.legend(title="Vowel Categories")
+
+# for (F1, F2), label in zip(centers, ipa_labels):
+#     ax.text(F2, F1 - 10, label, fontsize=14, ha='center', va='bottom')  
 
 ax.xaxis.set_inverted(True)
 ax.yaxis.set_inverted(True)
+
+ax.set_xlabel("F2 (Hz)")
+ax.set_ylabel("F1 (Hz)")
+ax.set_title("Smooth Perceptual Vowel Map")
+#plt.show()
+
+# making the surface
+
+print('RGB', RGB_img.shape)
+
+Z = np.max(prob_matrix.to_numpy(), axis=1)
+print('Z', Z.shape)
+
+Z_interpolated = griddata(points, Z, grid_coords, method='cubic')
+
+Z_surf = Z_interpolated.reshape(F1_mesh.shape)
+Z_2d = Z_surf.reshape(150, 150)
+RGB_surf = np.stack([R_img, G_img, B_img, Z_surf], axis=-1)
+RGB_surf_clip = np.clip(RGB_surf, 0, 1)
+
+
+fig = plt.figure(figsize=(10, 8))
+ax = fig.add_subplot(111, projection='3d')
+
+ax.plot_surface(
+    F2_mesh,
+    F1_mesh,
+    Z_2d,
+    facecolors=RGB_surf_clip,
+    rstride=3, cstride=3,
+    edgecolor='black',
+    linewidth=0.5,
+    shade=False
+)
+
+#ax.scatter(F2, F1, Z, c=color_map, s=100, edgecolors='black')
+hight = np.ones(6)
+for i in range(centers.shape[0]):
+    ax.scatter(centers[i,1], centers[i,0], hight, color=basic_colors[i], label=ipa_labels[i], s=30)
+
+ax.legend(title="Vowel Categories")
+
+ax.xaxis.set_inverted(True)
+ax.yaxis.set_inverted(True)
+
+ax.set_xlabel("F2 (Hz)")
+ax.set_ylabel("F1 (Hz)")
+ax.set_zlabel("Certainty (max probability)")
 
 plt.show()

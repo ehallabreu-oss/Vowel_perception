@@ -11,9 +11,10 @@ centers = np.array([
     [342.67, 1239.11]
 ]) 
 labels = ["/æ/", "/ɛ/", "/i/", "/ɪ/", "/ɒ/", "/u/"]
-basic_colors = ['red', 'orange', 'brown', 'green', 'blue', 'pink']
+basic_colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple']
 
-data = pd.read_csv("Avery_3_vowel_classification_results.csv")
+
+data = pd.read_csv("Ilia_4_vowel_classification_results.csv")
 formants = data[["F1", "F2"]].to_numpy()
 response = data["response"].to_numpy()
 
@@ -21,7 +22,10 @@ color_mapping = {'bat': 'red', 'bet': 'orange', 'beet': 'brown', 'bit': 'green',
 response_dict = {i: response for i, response in enumerate(response)}
 response_colors = [color_mapping[response_dict[i]] for i in range(len(response_dict))]
 
+plt.style.use('dark_background')
 fig, ax = plt.subplots(figsize=(6, 5))
+
+
 ax.xaxis.set_inverted(True)
 ax.yaxis.set_inverted(True)
 
