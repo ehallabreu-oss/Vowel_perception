@@ -7,9 +7,12 @@ from torch import nn
 training_data = pd.read_csv('training_data_vowels.csv')
 
 formants = training_data[["F1", "F2"]].to_numpy()
-X_train = (formants - np.mean(formants, axis=0))/np.std(formants, axis=0)
-response = training_data["Word"].to_numpy()
+normalised = (formants - np.mean(formants, axis=0))/np.std(formants, axis=0)
+word = training_data["Word"].to_numpy()
 
+idx = np.random.permutation(len(normalised))
+X_train = normalised[idx]
+response = word[idx]
 
 color_mapping = {'Bat': 'red', 'Bet': 'orange', 'Beet': 'brown', 'Bit': 'green', 'Bought': 'blue', 'Boot': 'pink'}
 response_colors = [color_mapping[response[i]] for i in range(len(response))]
@@ -17,13 +20,11 @@ response_colors = [color_mapping[response[i]] for i in range(len(response))]
 number_mapping = {'Bat': 0, 'Bet': 1, 'Beet': 2, 'Bit': 3, 'Bought': 4, 'Boot': 5}
 response_values = [number_mapping[response[i]] for i in range(len(response))]
 targets = np.eye(6)[response_values]
-print(targets[:5])
-
 
 #plt.style.use('dark_background')
 fig, ax = plt.subplots(figsize=(6, 5))
 
-ax.scatter(formants[:,1], formants[:,0], c=response_colors, s=50)
+ax.scatter(X_train[:,1], X_train[:,0], c=response_colors, s=50)
 
 ax.xaxis.set_inverted(True)
 ax.yaxis.set_inverted(True)
