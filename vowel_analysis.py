@@ -14,7 +14,7 @@ labels = ["/æ/", "/ɛ/", "/i/", "/ɪ/", "/ɒ/", "/u/"]
 basic_colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple']
 
 
-data = pd.read_csv("Ilia_4_vowel_classification_results.csv")
+data = pd.read_csv("*_vowel_classification_results.csv")
 formants = data[["F1", "F2"]].to_numpy()
 response = data["response"].to_numpy()
 
