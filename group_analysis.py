@@ -101,7 +101,6 @@ grid_coords = np.column_stack([F2_mesh.ravel(), F1_mesh.ravel()])
 
 points = np.column_stack((F2, F1))
 
-
 R = color_map[:,0]
 G = color_map[:,1]
 B = color_map[:,2]
@@ -119,6 +118,7 @@ B_img = B_grid.reshape(F1_mesh.shape)
 
 RGB_img = np.stack([R_img, G_img, B_img], axis=2) # (150, 150, 3)
 
+# plotting
 fig, ax = plt.subplots(figsize=(6, 5))
 
 ax.imshow(
@@ -146,7 +146,9 @@ ax.set_ylabel("F1 (Hz)")
 ax.set_title("Smooth Perceptual Vowel Map")
 #plt.show()
 
-# making the surface
+# ---------------
+# 3D Plot
+# ---------------
 
 print('RGB', RGB_img.shape)
 
