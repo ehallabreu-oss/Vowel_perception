@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import torch
 from torch import nn
 from torch.optim import Adam
+from group_analysis import RGB_img
 from scipy.spatial import ConvexHull
 
 df = pd.read_csv('Training_data_participants.csv', sep=';')
@@ -89,17 +90,17 @@ with torch.no_grad():   # no gradients needed
 print(f"Test Accuracy: {test_accuracy:.3f}")
 
 plt.style.use('dark_background')
-# fig, ax = plt.subplots(figsize=(6, 5))
+fig, ax = plt.subplots(figsize=(6, 5))
 
-# ax.scatter(X_shuffled[:,1], X_shuffled[:,0], c=response_colors, s=50)
+ax.scatter(X_shuffled[:,1], X_shuffled[:,0], c=response_colors, s=50)
 
-# ax.xaxis.set_inverted(True)
-# ax.yaxis.set_inverted(True)
-# ax.set_xlabel("F2 Hz")
-# ax.set_ylabel("F1 Hz")
-# ax.set_title("vowel grid")
-# ax.grid(True)
-# plt.show()
+ax.xaxis.set_inverted(True)
+ax.yaxis.set_inverted(True)
+ax.set_xlabel("F2 Hz")
+ax.set_ylabel("F1 Hz")
+ax.set_title("vowel grid")
+ax.grid(True)
+plt.show()
 
 # ----------------------
 # Decision heat map
@@ -132,30 +133,25 @@ label_colors = {
 }
 
 rgb_label_matrix = np.vstack(list(label_colors.values()))
-RGB_matrix = pred_matrix @ rgb_label_matrix
-print(RGB_matrix.shape) # (22500, 3)
-RGB_img = RGB_matrix.reshape(num, num, 3)
+RGB_matrix = pred_matrix @ rgb_label_matrix # (22500, 3)
+RGB_ann = RGB_matrix.reshape(num, num, 3)
 
-# making the expanded convex hull
-hull = ConvexHull(formants)
+threshold = 0.001
+behav_mask = np.any(RGB_img > threshold, axis=-1) # is any of the 3 channels non zero? 
+print('behav_mask', behav_mask.shape)
+RGB_ann_masked = RGB_ann.copy()
+RGB_ann_surf = RGB_ann.copy()
+RGB_ann_masked[~behav_mask] = [0, 0, 0]
+RGB_ann_surf[~behav_mask] = [1, 1, 1]
 
-def in_hull(points):
-    A = hull.equations[:, :-1] # all rows and all columns except last
-    b = hull.equations[:, -1]  # last column only
-    return np.all(A @ points.T + b[:, None] <= 1e-12, axis=0)
-
-mask = in_hull(grid_coords)
-mask_2d = mask.reshape(num, num)
-
-RGBA_img = np.zeros((num, num, 4))
-RGBA_img[..., :3] = RGB_img
-RGBA_img[..., 3] = mask_2d.astype(float)
+print("behav zeros per channel:", (RGB_img == 0).all(axis=(0,1)))
 
 fig, ax = plt.subplots(figsize=(6, 5))
 
 ax.imshow(
-    RGBA_img,
-    extent=(F2_norm.min(), F2_norm.max(), F1_norm.max(), F1_norm.min()), 
+    RGB_ann_masked,
+    extent=(F2_norm.min(), F2_norm.max(), 
+            F1_norm.max(), F1_norm.min()), 
     aspect='auto'
 )
 ax.scatter(X_shuffled[:,1], X_shuffled[:,0], c=response_colors, s=50, edgecolor='black')
@@ -176,7 +172,10 @@ plt.show()
 Z = np.max(pred_matrix, axis=1)
 print(Z.shape)
 Z_2d = Z.reshape(150, 150)
-RGB_surf = np.stack([RGB_img[:,:,0], RGB_img[:,:,1], RGB_img[:,:,2], Z_2d], axis=-1)
+Z_2d_masked = Z_2d.copy()
+Z_2d_masked[~behav_mask] = 0
+
+RGB_surf = np.stack([RGB_ann_masked[:,:,0], RGB_ann_masked[:,:,1], RGB_ann_masked[:,:,2], Z_2d], axis=-1)
 RGB_surf_clip = np.clip(RGB_surf, 0, 1)
 
 fig = plt.figure(figsize=(10, 8))
@@ -185,11 +184,12 @@ ax = fig.add_subplot(111, projection='3d')
 ax.plot_surface(
     F2_mesh,
     F1_mesh,
-    Z_2d,
+    Z_2d_masked,
     facecolors=RGB_surf_clip,
     rstride=3, cstride=3,
     edgecolor='black',
-    linewidth=0.2,
+    linewidth=0,
+    antialiased=False,
     shade=False
 )
 

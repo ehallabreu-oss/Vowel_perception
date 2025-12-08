@@ -4,14 +4,15 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 centers = np.array([
-    [769.73, 1528.8],  
-    [631.82, 1734.60],
-    [267.86, 2363.75],
-    [461.38, 1906.73],
-    [669.84, 995.82],
-    [342.67, 1239.11]
+    [267.86, 2363.75],  #beet
+    [342.67, 1239.11],  #boot
+    [669.84, 995.82],   #bought
+    [769.73, 1528.8],   #bat
+    [631.82, 1734.60],  #bet
+    [461.38, 1906.73]   #bit
 ]) 
 labels = ["/æ/", "/ɛ/", "/i/", "/ɪ/", "/ɒ/", "/u/"]
+basic_colors = ['yellow', 'orange', 'red', 'purple', 'blue', 'green']
 
 # making the expanded convex hull
 hull = ConvexHull(centers)
@@ -46,14 +47,15 @@ outside_points = grid_points[~mask]
 df = pd.DataFrame(inside_points, columns=["F1", "F2"])
 df.to_csv("inside_points.csv", index=False)
 
+plt.style.use('dark_background')
 fig, ax = plt.subplots(figsize=(6, 5))
 ax.xaxis.set_inverted(True)
 ax.yaxis.set_inverted(True)
 
-ax.scatter(grid_points[:,1], grid_points[:,0], color='lightgray')
-ax.scatter(inside_points[:,1], inside_points[:,0], color='blue')
+ax.scatter(grid_points[:,1], grid_points[:,0], color='black')
+ax.scatter(inside_points[:,1], inside_points[:,0], color='black')
 
-ax.scatter(centers[:, 1], centers[:, 0], color="red", s=40)
+ax.scatter(centers[:, 1], centers[:, 0], c=basic_colors, s=70)
 for (F1, F2), label in zip(centers, labels):
     ax.text(F2, F1 - 10, label,
             fontsize=14,

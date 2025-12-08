@@ -3,9 +3,10 @@ import pandas as pd
 import glob 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-from scipy.interpolate import griddata
+from scipy.interpolate import griddata, RegularGridInterpolator
 
-centers = np.array([
+
+centers_raw = np.array([
     [267.86, 2363.75],  #beet
     [342.67, 1239.11],  #boot
     [669.84, 995.82],   #bought
@@ -60,10 +61,23 @@ color_map = color_map_df.values
 # prob_matrix['color'] = prob_matrix['predicted_word'].map(word_to_color)
 # color_list = prob_matrix['color'] 
 
-F1 = prob_matrix.index.get_level_values('F1').to_numpy()
-F2 = prob_matrix.index.get_level_values('F2').to_numpy()
+# normalizing
+
+def normalize(x):
+    return (x - np.mean(x))/np.std(x)
+
+F1_raw = prob_matrix.index.get_level_values('F1').to_numpy()
+F2_raw = prob_matrix.index.get_level_values('F2').to_numpy()
+F1 = normalize(F1_raw)
+F2 = normalize(F2_raw)
+
+F1_center = (centers_raw[:,0] - np.mean(F1_raw))/np.std(F1_raw)
+F2_center = (centers_raw[:,1] - np.mean(F2_raw))/np.std(F2_raw)
+centers = np.column_stack([F1_center, F2_center])
+
 
 # Plotting
+
 plt.style.use('dark_background')
 fig, ax = plt.subplots(figsize=(6, 5))
 
@@ -77,15 +91,20 @@ ax.scatter(F2, F1, c=color_map, s=300)
 for i in range(centers.shape[0]):
     ax.scatter(centers[i,1], centers[i,0], color=basic_colors[i], label=ipa_labels[i], edgecolors='black', s=60)
 
-ax.legend(title="Vowel Categories")
 
-# for (F1, F2), label in zip(centers, ipa_labels):
-#     ax.text(F2, F1 - 10, label, fontsize=14, ha='center', va='bottom')  
+for (f1, f2), label in zip(centers, ipa_labels):
+    ax.text(f2, f1 - 10, label,
+            fontsize=14,
+            ha='center',  # horizontal alignment
+            va='bottom')  # vertical alignment slightly above point 
+    
+ax.legend(title="Vowel Categories")
 
 ax.set_xlabel("F2 Hz")
 ax.set_ylabel("F1 Hz")
-ax.set_title("vowel grid")
-#plt.show()
+ax.set_title("Discrete Perceptual Vowel Map")
+plt.show()
+
 
 # ----------------------
 # Interpolated Heat map
@@ -104,12 +123,10 @@ points = np.column_stack((F2, F1))
 R = color_map[:,0]
 G = color_map[:,1]
 B = color_map[:,2]
-print('R', R.shape)
 
 R_grid = griddata(points, R, grid_coords, method='cubic') # (150*150,)
 G_grid = griddata(points, G, grid_coords, method='cubic')
 B_grid = griddata(points, B, grid_coords, method='cubic')
-print('R_grid', R_grid.shape)
 
 # reshape into 2d vectors
 R_img = R_grid.reshape(F1_mesh.shape) # (150, 150)
@@ -135,8 +152,11 @@ for i in range(centers.shape[0]):
 
 ax.legend(title="Vowel Categories")
 
-# for (F1, F2), label in zip(centers, ipa_labels):
-#     ax.text(F2, F1 - 10, label, fontsize=14, ha='center', va='bottom')  
+for (f1, f2), label in zip(centers, ipa_labels):
+    ax.text(f1, f2 - 10, label,
+            fontsize=14,
+            ha='center',  # horizontal alignment
+            va='bottom')  # vertical alignment slightly above point
 
 ax.xaxis.set_inverted(True)
 ax.yaxis.set_inverted(True)
@@ -144,7 +164,7 @@ ax.yaxis.set_inverted(True)
 ax.set_xlabel("F2 (Hz)")
 ax.set_ylabel("F1 (Hz)")
 ax.set_title("Smooth Perceptual Vowel Map")
-#plt.show()
+plt.show()
 
 # ---------------
 # 3D Plot
@@ -162,23 +182,20 @@ Z_2d = Z_surf.reshape(150, 150)
 RGB_surf = np.stack([R_img, G_img, B_img, Z_surf], axis=-1)
 RGB_surf_clip = np.clip(RGB_surf, 0, 1)
 
-
 fig = plt.figure(figsize=(10, 8))
 ax = fig.add_subplot(111, projection='3d')
 
 ax.plot_surface(
-    F2_mesh,
-    F1_mesh,
-    Z_2d,
+    F2_mesh, F1_mesh,Z_2d,
     facecolors=RGB_surf_clip,
-    #rstride=3, cstride=3,
-    #edgecolor='black',
-    linewidth=6,
+    rstride=3, cstride=3,
+    edgecolor='black',
+    linewidth=0.3,
     shade=False
 )
 
-#ax.scatter(F2, F1, Z, c=color_map, s=100, edgecolors='black')
 hight = np.ones(6)
+
 for i in range(centers.shape[0]):
     ax.scatter(centers[i,1], centers[i,0], hight, color=basic_colors[i], label=ipa_labels[i], s=30)
 
@@ -192,3 +209,85 @@ ax.set_ylabel("F1 (Hz)")
 ax.set_zlabel("Certainty (max probability)")
 
 plt.show()
+
+# ----------------------
+# Slice up that graph 
+# ----------------------
+
+p1 = centers[4]
+p2 = centers[1]
+
+num_points = 200
+t = np.linspace(0, 1, num_points)
+slice_coords = p1 + t[:, None] * (p2 - p1)
+
+# Find closest F1 and F2 values
+F1_idx = np.array([np.argmin(np.abs(F1_grid - f1)) for f1 in slice_coords[:,0]])
+F2_idx = np.array([np.argmin(np.abs(F2_grid - f2)) for f2 in slice_coords[:,1]])
+
+slice_height_rough = RGB_surf_clip[F1_idx, F2_idx, 3]
+slice_height = np.where(np.isnan(slice_height_rough), 1, slice_height_rough)
+print(slice_height.shape) # (100,)
+slice_rgb = RGB_surf_clip[F1_idx, F2_idx, :3]
+
+degree = 7  # cubic polynomial
+coeffs = np.polyfit(t, slice_height, deg=degree)
+t_smooth = np.linspace(t.min(), t.max(), 500)
+slice_height_poly = np.polyval(coeffs, t_smooth)
+
+plt.figure()
+plt.plot(t_smooth, slice_height_poly, color='white', lw=1)
+plt.scatter(t, slice_height, c=slice_rgb, s=20)
+plt.xlabel('position along line connecting /æ/ and /ɒ/')
+plt.ylabel('Confidence level')
+plt.title('Decision curve between /ɛ/ and /u/')
+plt.show()
+
+# slicing plane
+slice_vec = p2 - p1
+slice_vec = slice_vec / np.linalg.norm(slice_vec)
+slice_perp = np.array([slice_vec[1], -slice_vec[0]])  # rotate 90°
+slice_perp = slice_perp / np.linalg.norm(slice_perp)
+
+plane_width = 0.5     # adjust thickness of plane
+plane_length = np.linalg.norm(p2 - p1)
+
+t = np.linspace(0, plane_length, 100)   # plane length
+s = np.linspace(-plane_width/2, plane_width/2, 40)
+
+T, S = np.meshgrid(t, s)
+
+X_plane = p1[0] + T * slice_vec[0] + S * slice_perp[0]
+Y_plane = p1[1] + T * slice_vec[1] + S * slice_perp[1]
+
+interp = RegularGridInterpolator((F1_grid, F2_grid), Z_2d)
+points = np.column_stack([X_plane.ravel(), Y_plane.ravel()])
+Z_plane = interp(points).reshape(X_plane.shape)
+
+fig = plt.figure(figsize=(10, 8))
+ax = fig.add_subplot(111, projection='3d')
+
+ax.plot_surface(
+    F2_mesh, F1_mesh,Z_2d,
+    facecolors=RGB_surf_clip,
+    rstride=3, cstride=3,
+    edgecolor='black',
+    linewidth=0.3,
+    shade=False
+)
+
+ax.plot_surface(
+    X_plane, Y_plane, Z_plane,
+    alpha=1,
+    color='gray',
+    rstride=1, cstride=1
+)
+
+plt.show()
+
+
+
+
+
+
+
