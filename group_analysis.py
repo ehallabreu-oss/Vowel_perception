@@ -147,16 +147,16 @@ ax.imshow(
 ax.scatter(F2, F1, c=color_map, s=50, edgecolors='black')
 
 # natural vowels
-for i in range(centers.shape[0]):
-    ax.scatter(centers[i,1], centers[i,0], color=basic_colors[i], label=ipa_labels[i], edgecolors='black', s=60)
+# for i in range(centers.shape[0]):
+#     ax.scatter(centers[i,1], centers[i,0], color=basic_colors[i], label=ipa_labels[i], edgecolors='black', s=60)
 
-ax.legend(title="Vowel Categories")
+# ax.legend(title="Vowel Categories")
 
-for (f1, f2), label in zip(centers, ipa_labels):
-    ax.text(f1, f2 - 10, label,
-            fontsize=14,
-            ha='center',  # horizontal alignment
-            va='bottom')  # vertical alignment slightly above point
+# for (f1, f2), label in zip(centers, ipa_labels):
+#     ax.text(f1, f2 - 10, label,
+#             fontsize=14,
+#             ha='center',  # horizontal alignment
+#             va='bottom')  # vertical alignment slightly above point
 
 ax.xaxis.set_inverted(True)
 ax.yaxis.set_inverted(True)
@@ -194,12 +194,12 @@ ax.plot_surface(
     shade=False
 )
 
-hight = np.ones(6)
+# hight = np.ones(6)
 
-for i in range(centers.shape[0]):
-    ax.scatter(centers[i,1], centers[i,0], hight, color=basic_colors[i], label=ipa_labels[i], s=30)
+# for i in range(centers.shape[0]):
+#     ax.scatter(centers[i,1], centers[i,0], hight, color=basic_colors[i], label=ipa_labels[i], s=30)
 
-ax.legend(title="Vowel Categories")
+# ax.legend(title="Vowel Categories")
 
 ax.xaxis.set_inverted(True)
 ax.yaxis.set_inverted(True)
@@ -242,52 +242,3 @@ plt.xlabel('position along line connecting /æ/ and /ɒ/')
 plt.ylabel('Confidence level')
 plt.title('Decision curve between /ɛ/ and /u/')
 plt.show()
-
-# slicing plane
-slice_vec = p2 - p1
-slice_vec = slice_vec / np.linalg.norm(slice_vec)
-slice_perp = np.array([slice_vec[1], -slice_vec[0]])  # rotate 90°
-slice_perp = slice_perp / np.linalg.norm(slice_perp)
-
-plane_width = 0.5     # adjust thickness of plane
-plane_length = np.linalg.norm(p2 - p1)
-
-t = np.linspace(0, plane_length, 100)   # plane length
-s = np.linspace(-plane_width/2, plane_width/2, 40)
-
-T, S = np.meshgrid(t, s)
-
-X_plane = p1[0] + T * slice_vec[0] + S * slice_perp[0]
-Y_plane = p1[1] + T * slice_vec[1] + S * slice_perp[1]
-
-interp = RegularGridInterpolator((F1_grid, F2_grid), Z_2d)
-points = np.column_stack([X_plane.ravel(), Y_plane.ravel()])
-Z_plane = interp(points).reshape(X_plane.shape)
-
-fig = plt.figure(figsize=(10, 8))
-ax = fig.add_subplot(111, projection='3d')
-
-ax.plot_surface(
-    F2_mesh, F1_mesh,Z_2d,
-    facecolors=RGB_surf_clip,
-    rstride=3, cstride=3,
-    edgecolor='black',
-    linewidth=0.3,
-    shade=False
-)
-
-ax.plot_surface(
-    X_plane, Y_plane, Z_plane,
-    alpha=1,
-    color='gray',
-    rstride=1, cstride=1
-)
-
-plt.show()
-
-
-
-
-
-
-

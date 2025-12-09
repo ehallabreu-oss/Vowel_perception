@@ -92,13 +92,12 @@ print(f"Test Accuracy: {test_accuracy:.3f}")
 plt.style.use('dark_background')
 fig, ax = plt.subplots(figsize=(6, 5))
 
-ax.scatter(X_shuffled[:,1], X_shuffled[:,0], c=response_colors, s=50)
+ax.scatter(X_shuffled[:,1], X_shuffled[:,0], c=response_colors, edgecolors='black', s=50)
 
 ax.xaxis.set_inverted(True)
 ax.yaxis.set_inverted(True)
 ax.set_xlabel("F2 Hz")
 ax.set_ylabel("F1 Hz")
-ax.set_title("vowel grid")
 ax.grid(True)
 plt.show()
 
@@ -188,8 +187,7 @@ ax.plot_surface(
     facecolors=RGB_surf_clip,
     rstride=3, cstride=3,
     edgecolor='black',
-    linewidth=0,
-    antialiased=False,
+    linewidth=0.3,
     shade=False
 )
 

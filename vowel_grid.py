@@ -11,7 +11,7 @@ centers = np.array([
     [631.82, 1734.60],  #bet
     [461.38, 1906.73]   #bit
 ]) 
-labels = ["/æ/", "/ɛ/", "/i/", "/ɪ/", "/ɒ/", "/u/"]
+ipa_labels = ["/i/", "/u/", "/ɒ/", "/æ/", "/ɛ/", "/ɪ/"]
 basic_colors = ['yellow', 'orange', 'red', 'purple', 'blue', 'green']
 
 # making the expanded convex hull
@@ -52,11 +52,11 @@ fig, ax = plt.subplots(figsize=(6, 5))
 ax.xaxis.set_inverted(True)
 ax.yaxis.set_inverted(True)
 
-ax.scatter(grid_points[:,1], grid_points[:,0], color='black')
-ax.scatter(inside_points[:,1], inside_points[:,0], color='black')
+ax.scatter(grid_points[:,1], grid_points[:,0], color='darkgrey', alpha=0.5)
+ax.scatter(inside_points[:,1], inside_points[:,0], color='white')
 
 ax.scatter(centers[:, 1], centers[:, 0], c=basic_colors, s=70)
-for (F1, F2), label in zip(centers, labels):
+for (F1, F2), label in zip(centers, ipa_labels):
     ax.text(F2, F1 - 10, label,
             fontsize=14,
             ha='center',  # horizontal alignment
