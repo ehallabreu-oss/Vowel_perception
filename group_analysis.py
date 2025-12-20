@@ -2,9 +2,7 @@ import numpy as np
 import pandas as pd
 import glob 
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from scipy.interpolate import griddata, RegularGridInterpolator
-
+from scipy.interpolate import griddata
 
 centers_raw = np.array([
     [267.86, 2363.75],  #beet
@@ -16,7 +14,7 @@ centers_raw = np.array([
 ]) 
 
 # load data from all participants
-csv_files = glob.glob("*_vowel_classification_results.csv")
+csv_files = glob.glob("used_data/*_vowel_classification_results.csv")
 data_frames = []
 for f in csv_files:
     df = pd.read_csv(f)
@@ -78,7 +76,7 @@ centers = np.column_stack([F1_center, F2_center])
 
 # Plotting
 
-plt.style.use('dark_background')
+#plt.style.use('dark_background')
 fig, ax = plt.subplots(figsize=(6, 5))
 
 ax.xaxis.set_inverted(True)
@@ -163,12 +161,12 @@ ax.yaxis.set_inverted(True)
 
 ax.set_xlabel("F2 (Hz)")
 ax.set_ylabel("F1 (Hz)")
-ax.set_title("Smooth Perceptual Vowel Map")
+#ax.set_title("Smooth Perceptual Vowel Map")
 plt.show()
 
-# ---------------
+# -----------
 # 3D Plot
-# ---------------
+# -----------
 
 print('RGB', RGB_img.shape)
 
@@ -176,6 +174,8 @@ Z = np.max(prob_matrix.to_numpy(), axis=1)
 print('Z', Z.shape)
 
 Z_interpolated = griddata(points, Z, grid_coords, method='cubic')
+
+print('Z_interpolated', Z_interpolated.shape)
 
 Z_surf = Z_interpolated.reshape(F1_mesh.shape)
 Z_2d = Z_surf.reshape(150, 150)
@@ -194,7 +194,7 @@ ax.plot_surface(
     shade=False
 )
 
-# hight = np.ones(6)
+hight = np.ones(6)
 
 # for i in range(centers.shape[0]):
 #     ax.scatter(centers[i,1], centers[i,0], hight, color=basic_colors[i], label=ipa_labels[i], s=30)
@@ -236,9 +236,9 @@ t_smooth = np.linspace(t.min(), t.max(), 500)
 slice_height_poly = np.polyval(coeffs, t_smooth)
 
 plt.figure()
-plt.plot(t_smooth, slice_height_poly, color='white', lw=1)
+plt.plot(t_smooth, slice_height_poly, color='black', lw=1)
 plt.scatter(t, slice_height, c=slice_rgb, s=20)
-plt.xlabel('position along line connecting /æ/ and /ɒ/')
+plt.xlabel('position along line connecting /ɛ/ and /u/')
 plt.ylabel('Confidence level')
 plt.title('Decision curve between /ɛ/ and /u/')
 plt.show()

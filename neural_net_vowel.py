@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import torch
 from torch import nn
 from torch.optim import Adam
-from group_analysis import RGB_img
+from group_analysis import RGB_img, F2, F1, color_map
 from scipy.spatial import ConvexHull
 
 df = pd.read_csv('Training_data_participants.csv', sep=';')
@@ -89,7 +89,7 @@ with torch.no_grad():   # no gradients needed
 
 print(f"Test Accuracy: {test_accuracy:.3f}")
 
-plt.style.use('dark_background')
+#plt.style.use('dark_background')
 fig, ax = plt.subplots(figsize=(6, 5))
 
 ax.scatter(X_shuffled[:,1], X_shuffled[:,0], c=response_colors, edgecolors='black', s=50)
@@ -140,7 +140,7 @@ behav_mask = np.any(RGB_img > threshold, axis=-1) # is any of the 3 channels non
 print('behav_mask', behav_mask.shape)
 RGB_ann_masked = RGB_ann.copy()
 RGB_ann_surf = RGB_ann.copy()
-RGB_ann_masked[~behav_mask] = [0, 0, 0]
+RGB_ann_masked[~behav_mask] = [1, 1, 1]
 RGB_ann_surf[~behav_mask] = [1, 1, 1]
 
 print("behav zeros per channel:", (RGB_img == 0).all(axis=(0,1)))
@@ -162,6 +162,33 @@ ax.yaxis.set_inverted(True)
 ax.set_xlabel("F2 (Hz)")
 ax.set_ylabel("F1 (Hz)")
 ax.set_title("Neural Net Decision Map")
+plt.show()
+
+
+# plotting
+fig, ax = plt.subplots(figsize=(6, 5))
+
+ax.imshow(
+    RGB_img,
+    extent=(F2.min(), F2.max(), F1.max(), F1.min()), 
+    aspect='auto'
+)
+
+ax.scatter(F2, F1, c=color_map, s=50, edgecolors='black')
+ax.scatter(X_shuffled[:,1], X_shuffled[:,0], c=response_colors, edgecolors='black', s=50)
+
+# natural vowels
+# for i in range(centers.shape[0]):
+#     ax.scatter(centers[i,1], centers[i,0], color=basic_colors[i], label=ipa_labels[i], edgecolors='black', s=60)
+
+# ax.legend(title="Vowel Categories")
+
+ax.xaxis.set_inverted(True)
+ax.yaxis.set_inverted(True)
+
+ax.set_xlabel("F2 (Hz)")
+ax.set_ylabel("F1 (Hz)")
+#ax.set_title("Smooth Perceptual Vowel Map")
 plt.show()
 
 # -------
@@ -199,10 +226,6 @@ ax.set_ylabel("F1 (Hz)")
 ax.set_zlabel("Certainty (max probability)")
 
 plt.show()
-
-
-
-
 
 
 

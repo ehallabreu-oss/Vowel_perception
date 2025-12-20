@@ -47,22 +47,22 @@ outside_points = grid_points[~mask]
 df = pd.DataFrame(inside_points, columns=["F1", "F2"])
 df.to_csv("inside_points.csv", index=False)
 
-plt.style.use('dark_background')
+#plt.style.use('dark_background')
 fig, ax = plt.subplots(figsize=(6, 5))
 ax.xaxis.set_inverted(True)
 ax.yaxis.set_inverted(True)
 
 ax.scatter(grid_points[:,1], grid_points[:,0], color='darkgrey', alpha=0.5)
-ax.scatter(inside_points[:,1], inside_points[:,0], color='white')
+ax.scatter(inside_points[:,1], inside_points[:,0], color='black')
 
 ax.scatter(centers[:, 1], centers[:, 0], c=basic_colors, s=70)
 for (F1, F2), label in zip(centers, ipa_labels):
     ax.text(F2, F1 - 10, label,
             fontsize=14,
-            ha='center',  # horizontal alignment
+            ha='left',  # horizontal alignment
             va='bottom')  # vertical alignment slightly above point
         
 ax.set_xlabel("F2 Hz")
 ax.set_ylabel("F1 Hz")
-ax.set_title("Vowel chart grid")
+#ax.set_title("Vowel chart grid")
 plt.show()
