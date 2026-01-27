@@ -14,7 +14,7 @@ centers_raw = np.array([
 ]) 
 
 # load data from all participants
-csv_files = glob.glob("used_data/*_vowel_classification_results.csv")
+csv_files = glob.glob("behavioural_data/*_vowel_classification_results.csv")
 data_frames = []
 for f in csv_files:
     df = pd.read_csv(f)
@@ -54,10 +54,6 @@ rgb_df = pd.DataFrame(rgb_label_matrix, index=word_labels, columns=["R","G","B"]
 # dot will align columns of prob_mat_ordered with index of rgb_df by label names
 color_map_df = prob_matrix.dot(rgb_df)   # DataFrame (N, 3)
 color_map = color_map_df.values
-
-# prob_matrix['predicted_word'] = prob_matrix.idxmax(axis=1)
-# prob_matrix['color'] = prob_matrix['predicted_word'].map(word_to_color)
-# color_list = prob_matrix['color'] 
 
 # normalizing
 

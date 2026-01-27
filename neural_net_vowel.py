@@ -5,7 +5,6 @@ import torch
 from torch import nn
 from torch.optim import Adam
 from group_analysis import RGB_img, F2, F1, color_map
-from scipy.spatial import ConvexHull
 
 df = pd.read_csv('Training_data_participants.csv', sep=';')
 
